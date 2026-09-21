@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tasklist Application</title>
+  <body>
+
+    <h1>
+        Tasklist Application
+    </h1>
+
+
+    <input id="taskInput" placeholder="Type a Task">
+    <button onclick="CreateTask()">Add a Task</button>
+
+
+          <ul id="taskList"></ul>
+
+    <script>
+
+       var task = [];
+
+
+       function CreateTask(){
+
+        let input=  document.getElementById("taskInput");
+
+        let textData = input.value;
+ 
+        task.push(textData);
+        taskInput.value = "";
+ 
+      console.log(JSON.stringify(task.length))
+      console.log(JSON.stringify(task))
+
+
+
+      displayTasks();
+   
+    }
+
+    function editTask(i) {
+        let updatedTask = prompt("Edit your task:", task[i]);
+        if (updatedTask !== null && updatedTask.trim() !== "") {
+          task[i] = updatedTask.trim();
+          displayTasks();
+        }
+      }
+
+       
+    function displayTasks() {
+        let html = "";
+        for (let i = 0; i < task.length; i++) {
+            html += "<li>" + task[i] + 
+                " <button onclick='editTask(" + i + ")'>Edit</button>" +
+                " <button onclick='removeTask(" + i + ")'>x</button></li>";
+      }
+      document.getElementById("taskList").innerHTML = html;
+        }
+       
+    
+
+      function removeTask(i) {
+        task.splice(i, 1);
+
+        displayTasks();
+      }
+
+      
+
+      
+       
+    
+  
+    </script>
+
+
+  </body>
+  
+
+</head>
+
+</html>
