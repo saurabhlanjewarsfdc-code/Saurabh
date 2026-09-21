@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banking Application</title>
+  <style>
+    /* Basic Page Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    /* Simple Card Layout */
+    .card {
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Form Inputs & Buttons */
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-logout {
+      background-color: #dc3545;
+    }
+
+    .btn-logout:hover {
+      background-color: #bd2130;
+    }
+
+    /* Balance & User Info */
+    .balance {
+      font-size: 20px;
+      color: green;
+      font-weight: bold;
+    }
+
+    /* Table Formatting */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .debit {
+      color: red;
+      font-weight: bold;
+    }
+
+    .credit {
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- AUTH SECTION: Login & Register -->
+    <div id="auth-section">
+      
+      <!-- Login Card -->
+      <div class="card" id="login-card">
+        <h2>Login</h2>
+        <form id="login-form">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="login-username" placeholder="Enter username" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="Enter password" required>
+          </div>
+          <button type="submit">Login</button>
+          <p>Don't have an account? <a href="#" id="show-register">Register here</a></p>
+        </form>
+      </div>
+
+      <!-- Register Card -->
+      <div class="card hidden" id="register-card">
+        <h2>Register</h2>
+        <form id="register-form">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="reg-name" placeholder="Enter full name" required>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="reg-email" placeholder="Enter email" required>
+          </div>
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="reg-username" placeholder="Choose username" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="reg-password" placeholder="Choose password" required>
+          </div>
+          <div class="form-group">
+            <label>Initial Balance (INR)</label>
+            <input type="number" id="reg-balance" value="10000" min="0" required>
+          </div>
+          <button type="submit">Create Account</button>
+          <p>Already have an account? <a href="#" id="show-login">Login here</a></p>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboard-section" class="hidden">
+      
+      <!-- User Profile Header -->
+      <div class="card">
+        <h2 id="user-display-name">Welcome</h2>
+        <p>Account Number: <strong id="user-display-acc">----</strong></p>
+        <p>Available Balance: <span class="balance" id="user-display-balance">₹0</span></p>
+        <button id="logout-btn" class="btn-logout">Logout</button>
+      </div>
+
+      <!-- Add Beneficiary -->
+      <div class="card">
+        <h3>1. Add Beneficiary</h3>
+        <form id="add-beneficiary-form">
+          <div class="form-group">
+            <label>Beneficiary Account Number</label>
+            <input type="text" id="beneficiary-account" placeholder="Enter account number" required>
+          </div>
+          <div class="form-group">
+            <label>Nickname</label>
+            <input type="text" id="beneficiary-nickname" placeholder="e.g. Rahul" required>
+          </div>
+          <button type="submit">Add Beneficiary</button>
+        </form>
+      </div>
+
+      <!-- Transfer Money -->
+      <div class="card">
+        <h3>2. Money Transfer</h3>
+        <form id="transfer-form">
+          <div class="form-group">
+            <label>Select Beneficiary</label>
+            <select id="transfer-beneficiary" required>
+              <option value="">-- Select Beneficiary --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount (INR)</label>
+            <input type="number" id="transfer-amount" min="1" placeholder="Enter amount" required>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" id="transfer-desc" placeholder="e.g. Rent payment" required>
+          </div>
+          <button type="submit">Transfer Money</button>
+        </form>
+      </div>
+
+      <!-- Transaction History -->
+      <div class="card">
+        <h3>3. Transaction History</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Details</th>
+              <th>Amount</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="transaction-history-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Initial sample data
+    var SEED_DATA = {
+      users: [
+        { id: "u001", username: "mayank", password: "password123", name: "Mayank Singh", email: "mayank@example.com" },
+        { id: "u002", username: "rahul", password: "password456", name: "Rahul Sharma", email: "rahul@example.com" }
+      ],
+      accounts: [
+        { id: "acc001", userId: "u001", accountNumber: "1000000001", balance: 75000 },
+        { id: "acc002", userId: "u002", accountNumber: "1000000002", balance: 50000 }
+      ],
+      transactions: [
+        { id: "txn001", fromAccountId: "acc001", toAccountId: "acc002", amount: 5000, description: "Transfer to Rahul", createdAt: "2026-09-15" }
+      ],
+      beneficiaries: [
+        { id: "ben001", userId: "u001", beneficiaryAccountId: "acc002", nickname: "Rahul" }
+      ]
+    };
+
+    // Load data from LocalStorage or initialize default seed data
+    function loadData() {
+      if (!localStorage.getItem('db_users')) {
+        localStorage.setItem('db_users', JSON.stringify(SEED_DATA.users));
+        localStorage.setItem('db_accounts', JSON.stringify(SEED_DATA.accounts));
+        localStorage.setItem('db_transactions', JSON.stringify(SEED_DATA.transactions));
+        localStorage.setItem('db_beneficiaries', JSON.stringify(SEED_DATA.beneficiaries));
+      }
+      return {
+        users: JSON.parse(localStorage.getItem('db_users')),
+        accounts: JSON.parse(localStorage.getItem('db_accounts')),
+        transactions: JSON.parse(localStorage.getItem('db_transactions')),
+        beneficiaries: JSON.parse(localStorage.getItem('db_beneficiaries'))
+      };
+    }
+
+    var db = loadData();
+    var currentUserId = localStorage.getItem('db_current_user_id') || null;
+
+    // Save current data back to LocalStorage
+    function saveData() {
+      localStorage.setItem('db_users', JSON.stringify(db.users));
+      localStorage.setItem('db_accounts', JSON.stringify(db.accounts));
+      localStorage.setItem('db_transactions', JSON.stringify(db.transactions));
+      localStorage.setItem('db_beneficiaries', JSON.stringify(db.beneficiaries));
+      if (currentUserId) {
+        localStorage.setItem('db_current_user_id', currentUserId);
+      } else {
+        localStorage.removeItem('db_current_user_id');
+      }
+    }
+
+    // Navigation toggle logic
+    document.getElementById('show-register').onclick = function() {
+      document.getElementById('login-card').classList.add('hidden');
+      document.getElementById('register-card').classList.remove('hidden');
+    };
+
+    document.getElementById('show-login').onclick = function() {
+      document.getElementById('register-card').classList.add('hidden');
+      document.getElementById('login-card').classList.remove('hidden');
+    };
+
+    // Registration Handler
+    document.getElementById('register-form').onsubmit = function(e) {
+      e.preventDefault();
+      var usernameInput = document.getElementById('reg-username').value.trim().toLowerCase();
+
+      // Check if user already exists using a basic loop
+      for (var i = 0; i < db.users.length; i++) {
+        if (db.users[i].username === usernameInput) {
+          alert("Username already exists!");
+          return;
+        }
+      }
+
+      var newUserId = "u" + Date.now();
+      var newAccId = "acc" + Date.now();
+      var newAccNum = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+
+      // Add new user
+      db.users.push({
+        id: newUserId,
+        username: usernameInput,
+        password: document.getElementById('reg-password').value,
+        name: document.getElementById('reg-name').value,
+        email: document.getElementById('reg-email').value
+      });
+
+      // Add new account
+      db.accounts.push({
+        id: newAccId,
+        userId: newUserId,
+        accountNumber: newAccNum,
+        balance: parseFloat(document.getElementById('reg-balance').value)
+      });
+
+      saveData();
+      alert("Account created successfully! Your Account Number is: " + newAccNum);
+      
+      document.getElementById('register-form').reset();
+      document.getElementById('register-card').classList.add('hidden');
+      document.getElementById('login-card').classList.remove('hidden');
+    };
+
+    // Login Handler
+    document.getElementById('login-form').onsubmit = function(e) {
+      e.preventDefault();
+      var usernameInput = document.getElementById('login-username').value.trim().toLowerCase();
+      var passwordInput = document.getElementById('login-password').value;
+
+      var foundUser = null;
+      for (var i = 0; i < db.users.length; i++) {
+        if (db.users[i].username === usernameInput && db.users[i].password === passwordInput) {
+          foundUser = db.users[i];
+          break;
+        }
+      }
+
+      if (!foundUser) {
+        alert("Invalid username or password!");
+        return;
+      }
+
+      currentUserId = foundUser.id;
+      saveData();
+      document.getElementById('login-form').reset();
+      renderApp();
+    };
+
+    // Logout Handler
+    document.getElementById('logout-btn').onclick = function() {
+      currentUserId = null;
+      saveData();
+      renderApp();
+    };
+
+    // Add Beneficiary Handler
+    document.getElementById('add-beneficiary-form').onsubmit = function(e) {
+      e.preventDefault();
+      var accNumInput = document.getElementById('beneficiary-account').value.trim();
+      var nicknameInput = document.getElementById('beneficiary-nickname').value.trim();
+
+      // Find target account
+      var targetAcc = null;
+      for (var i = 0; i < db.accounts.length; i++) {
+        if (db.accounts[i].accountNumber === accNumInput) {
+          targetAcc = db.accounts[i];
+          break;
+        }
+      }
+
+      // Find user's account
+      var myAcc = null;
+      for (var i = 0; i < db.accounts.length; i++) {
+        if (db.accounts[i].userId === currentUserId) {
+          myAcc = db.accounts[i];
+          break;
+        }
+      }
+
+      if (!targetAcc) {
+        alert("Account number does not exist!");
+        return;
+      }
+
+      if (targetAcc.id === myAcc.id) {
+        alert("You cannot add your own account as a beneficiary!");
+        return;
+      }
+
+      // Check if already added
+      for (var i = 0; i < db.beneficiaries.length; i++) {
+        if (db.beneficiaries[i].userId === currentUserId && db.beneficiaries[i].beneficiaryAccountId === targetAcc.id) {
+          alert("Beneficiary already added!");
+          return;
+        }
+      }
+
+      db.beneficiaries.push({
+        id: "ben" + Date.now(),
+        userId: currentUserId,
+        beneficiaryAccountId: targetAcc.id,
+        nickname: nicknameInput
+      });
+
+      saveData();
+      alert("Beneficiary added successfully!");
+      document.getElementById('add-beneficiary-form').reset();
+      populateBeneficiaryDropdown();
+    };
+
+    // Transfer Money Handler
+    document.getElementById('transfer-form').onsubmit = function(e) {
+      e.preventDefault();
+      var targetAccId = document.getElementById('transfer-beneficiary').value;
+      var amount = parseFloat(document.getElementById('transfer-amount').value);
+      var description = document.getElementById('transfer-desc').value;
+
+      if (!targetAccId) {
+        alert("Please select a beneficiary!");
+        return;
+      }
+
+      // Get sender and receiver accounts
+      var senderAcc = null;
+      var receiverAcc = null;
+
+      for (var i = 0; i < db.accounts.length; i++) {
+        if (db.accounts[i].userId === currentUserId) {
+          senderAcc = db.accounts[i];
+        }
+        if (db.accounts[i].id === targetAccId) {
+          receiverAcc = db.accounts[i];
+        }
+      }
+
+      if (senderAcc.balance < amount) {
+        alert("Insufficient balance!");
+        return;
+      }
+
+      // Process transaction
+      senderAcc.balance -= amount;
+      receiverAcc.balance += amount;
+
+      db.transactions.push({
+        id: "txn" + Date.now(),
+        fromAccountId: senderAcc.id,
+        toAccountId: receiverAcc.id,
+        amount: amount,
+        description: description,
+        createdAt: new Date().toISOString().split('T')[0]
+      });
+
+      saveData();
+      alert("₹" + amount + " transferred successfully!");
+      document.getElementById('transfer-form').reset();
+      renderApp();
+    };
+
+    // Populate Beneficiary Dropdown
+    function populateBeneficiaryDropdown() {
+      var select = document.getElementById('transfer-beneficiary');
+      select.innerHTML = '<option value="">-- Select Beneficiary --</option>';
+
+      for (var i = 0; i < db.beneficiaries.length; i++) {
+        var b = db.beneficiaries[i];
+        if (b.userId === currentUserId) {
+          var targetAcc = null;
+          for (var j = 0; j < db.accounts.length; j++) {
+            if (db.accounts[j].id === b.beneficiaryAccountId) {
+              targetAcc = db.accounts[j];
+              break;
+            }
+          }
+          if (targetAcc) {
+            var opt = document.createElement('option');
+            opt.value = targetAcc.id;
+            opt.textContent = b.nickname + " (" + targetAcc.accountNumber + ")";
+            select.appendChild(opt);
+          }
+        }
+      }
+    }
+
+    // Main Render Function
+    function renderApp() {
+      var authSection = document.getElementById('auth-section');
+      var dashboardSection = document.getElementById('dashboard-section');
+
+      if (!currentUserId) {
+        authSection.classList.remove('hidden');
+        dashboardSection.classList.add('hidden');
+        return;
+      }
+
+      authSection.classList.add('hidden');
+      dashboardSection.classList.remove('hidden');
+
+      // Fetch active user and account
+      var currentUser = null;
+      var currentAcc = null;
+
+      for (var i = 0; i < db.users.length; i++) {
+        if (db.users[i].id === currentUserId) {
+          currentUser = db.users[i];
+          break;
+        }
+      }
+
+      for (var i = 0; i < db.accounts.length; i++) {
+        if (db.accounts[i].userId === currentUserId) {
+          currentAcc = db.accounts[i];
+          break;
+        }
+      }
+
+      // Display Details
+      document.getElementById('user-display-name').textContent = "Welcome, " + currentUser.name;
+      document.getElementById('user-display-acc').textContent = currentAcc.accountNumber;
+      document.getElementById('user-display-balance').textContent = "₹" + currentAcc.balance;
+
+      populateBeneficiaryDropdown();
+
+      // Render Transaction History
+      var tbody = document.getElementById('transaction-history-body');
+      tbody.innerHTML = '';
+
+      var userTxns = [];
+      for (var i = 0; i < db.transactions.length; i++) {
+        var t = db.transactions[i];
+        if (t.fromAccountId === currentAcc.id || t.toAccountId === currentAcc.id) {
+          userTxns.push(t);
+        }
+      }
+
+      if (userTxns.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">No transactions found.</td></tr>';
+        return;
+      }
+
+      for (var i = userTxns.length - 1; i >= 0; i--) {
+        var tx = userTxns[i];
+        var isDebit = tx.fromAccountId === currentAcc.id;
+
+        var tr = document.createElement('tr');
+        
+        var typeTd = "<td><span class='" + (isDebit ? "debit" : "credit") + "'>" + (isDebit ? "DEBIT" : "CREDIT") + "</span></td>";
+        var detailsTd = "<td>" + tx.description + "</td>";
+        var amountTd = "<td class='" + (isDebit ? "debit" : "credit") + "'>" + (isDebit ? "-" : "+") + "₹" + tx.amount + "</td>";
+        var dateTd = "<td>" + tx.createdAt + "</td>";
+
+        tr.innerHTML = typeTd + detailsTd + amountTd + dateTd;
+        tbody.appendChild(tr);
+      }
+    }
+
+    // Initial load call
+    renderApp();
+  </script>
+</body>
+</html>
